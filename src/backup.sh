@@ -20,7 +20,7 @@ for base in "${BASES[@]}"; do
   echo "[backup.sh] end ------------------------------------------------"
 
 
-  hash_bckp "${BCKPDIR}/${CNTNAME}-dump.sql"
+  hash_bckp "${BCKPDIR}/${CNTNAME}-dump.sql.xz"
 
   echo "${CNTNAME}|{$BCKPHASH}" >> ${BCKPDIR}/README.md  
 done

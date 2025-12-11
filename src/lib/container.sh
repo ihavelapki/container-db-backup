@@ -13,7 +13,11 @@ make_bckp() {
             USERNAME="$(docker exec -i ${CONTAINER} printenv | grep POSTGRES_USER | cut -d '=' -f2 2>/dev/null)";
             docker exec -i ${CONTAINER} pg_dump --dbname=${DBNAME} --username=${USERNAME} -F p -f /tmp/backup.sql 2>/dev/null;
             docker cp ${CONTAINER}:/tmp/backup.sql ${BCKPDIR}/${CONTAINER}-dump.sql 2>/dev/null;
-            echo "backup db for ${CONTAINER} has been made";
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] backup has been made for: ${CONTAINER}";
+
+            xz ${BCKPDIR}/${CONTAINER}-dump.sql
+
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] backup has been compressed";
         else
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [make_bckp] the next container is not running: ${CONTAINER}" &>2;
 #            exit 1
