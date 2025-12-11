@@ -15,9 +15,9 @@ make_bckp() {
             docker cp ${CONTAINER}:/tmp/backup.sql ${BCKPDIR}/${CONTAINER}-dump.sql 2>/dev/null;
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] backup has been made for: ${CONTAINER}";
 
-            xz ${BCKPDIR}/${CONTAINER}-dump.sql
+            # xz ${BCKPDIR}/${CONTAINER}-dump.sql
 
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] backup has been compressed";
+            # echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] backup has been compressed";
         else
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [make_bckp] the next container is not running: ${CONTAINER}" &>2;
 #            exit 1
