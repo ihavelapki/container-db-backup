@@ -1,64 +1,55 @@
-make_backup_container() {
+make_bckp() {
     start_time=$(date +%s.%N)
 
-    CONTAINER="$1";
-    echo "[make backup] ${CONTAINER}-test";
-    CURRDATE=$(date +%Y%m%d);
-    CURRTIME=$(date +%H%M);
-    BCKPDIR=/opt/rtl/archive/backup/${CURRDATE}/${CONTAINER};
+    BCKPDIR="$1";
+    CONTAINER="$2";
 
     if [[ "${CONTAINER}" != "" ]]; then
-        echo "[make backup] container name: ${CONTAINER}";
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] choosen the next container: ${CONTAINER}";
         if [[ "$(docker inspect -f '{{.State.Running}}' ${CONTAINER} 2>/dev/null)" = "true" ]]; then
-            echo "[make backup] container ${CONTAINER} is running";
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] the next container is running: ${CONTAINER}";
             mkdir -p ${BCKPDIR};
             DBNAME="$(docker exec -i ${CONTAINER} printenv | grep POSTGRES_DB | cut -d '=' -f2 2>/dev/null)";
             USERNAME="$(docker exec -i ${CONTAINER} printenv | grep POSTGRES_USER | cut -d '=' -f2 2>/dev/null)";
             docker exec -i ${CONTAINER} pg_dump --dbname=${DBNAME} --username=${USERNAME} -F p -f /tmp/backup.sql 2>/dev/null;
-            docker cp ${CONTAINER}:/tmp/backup.sql ${BCKPDIR}/${CURRDATE}-${CURRTIME}-dump.sql 2>/dev/null;
+            docker cp ${CONTAINER}:/tmp/backup.sql ${BCKPDIR}/${CONTAINER}-dump.sql 2>/dev/null;
             echo "backup db for ${CONTAINER} has been made";
         else
-            echo "container ${CONTAINER} is not running";
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [make_bckp] the next container is not running: ${CONTAINER}" &>2;
 #            exit 1
         fi
     else
-        echo "container name is empty";
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [make_bckp] container name is empty" &>2;
 #        exit 1
     fi
 
     end_time=$(date +%s.%N);
     elapsed=$(echo "($end_time - $start_time) * 1000" | bc);
-    echo "spent time is: $elapsed";
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [make_bckp] spent time is: $elapsed";
 }
 
-get_container_name() {
-    # start_time=$(date +%s.%N);
-
+get_cnt_name() {
+    start_time=$(date +%s.%N);
+    
     CONTAINERDIR="$1";
-    CURRDATE=$(date +%Y%m%d);
-    CURRTIME=$(date +%H%M);
+    
     if [[ -d "${CONTAINERDIR}" ]]; then
-        echo "${CONTAINERDIR}";
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [get_cnt_name] choosen the next dir: ${CONTAINERDIR}";
         if [[ -f "${CONTAINERDIR}/docker-compose.yml" ]]; then
-#	    echo "${CONTAINERDIR}/docker-compose.yml"
-#	    cat ${CONTAINERDIR}/docker-compose.yml
-#	    echo "check container name"
             NAME=$(grep -E 'container_name: *"?[^"]*db"?' ${CONTAINERDIR}/docker-compose.yml | cut -d ":" -f2 | cut -d " " -f2 2>/dev/null);
-            echo "${NAME}-kek";
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [get_cnt_name] container name is: ${NAME}";
         else
-            echo "keka";
-#            echo "kek" &>2
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [get_cnt_name] there is no such file: ${CONTAINERDIR}/docker-compose.yml" &>2
 #            exit 1
         fi
     else
-        echo "lola";
-#        echo "lol" &>2
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [get_cnt_name] there is no such directory: ${CONTAINERDIR}" &>2
 #        exit 1
     fi
 
     export CNTNAME=${NAME};
 
-    # end_time=$(date +%s.%N);
-    # elapsed=$(echo "($end_time - $start_time) * 1000" | bc);
-    # echo "spent time is: $elapsed";
+    end_time=$(date +%s.%N);
+    elapsed=$(echo "($end_time - $start_time) * 1000" | bc);
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [get_cnt_name] spent time is: $elapsed";
 }
