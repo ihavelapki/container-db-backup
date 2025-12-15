@@ -1,0 +1,6 @@
+[Timer]
+OnCalendar=hourly
+Persistent=false
+
+[Install]
+WantedBy=timer.target
