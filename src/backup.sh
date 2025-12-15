@@ -1,13 +1,15 @@
 #!/bin/bash
 
 set -e
-source /usr/local/lib/testrctl/backup/lib/info.sh
-source /usr/local/lib/testrctl/backup/lib/container.sh
+source /usr/local/lib/container-db-backup/info.sh
+source /usr/local/lib/container-db-backup/container.sh
 
 DT=$(date '+%Y%m%d-%H%M')
-BASES=("orchestrator" "keycloak" "db")
-BASEDIR=/opt/rtl/platform
-BCKPDIR=/opt/rtl/archive/backup/${DT}
+BASES=("keycloak" "db")
+BASEDIR=/opt/kek/
+BCKPDIR=/opt/kek/archive/backup/${DT}
+
+
 mkdir -p ${BCKPDIR}
 touch ${BCKPDIR}/README.md 
 
@@ -18,12 +20,12 @@ for base in "${BASES[@]}"; do
   
   make_bckp ${BCKPDIR} ${CNTNAME} 
 
-  hash_bckp "${BCKPDIR}/${CNTNAME}-dump.sql"
+  hash_bckp "${BCKPDIR}/${CNTNAME}-dump.sql.xz"
 
   echo "${CNTNAME}|${BCKPHASH}" >> ${BCKPDIR}/README.md  
 done
 
-tar -cf ${BCKPDIR}/backup.tar ${BCKPDIR}/*-dump.sql 2>/dev/null
+tar -cf ${BCKPDIR}/backup.tar ${BCKPDIR}/*-dump.sql.xz 2>/dev/null
 TOTALHASH=$(md5sum ${BCKPDIR}/backup.tar | awk '{print $1}')
 echo "TOTAL_BACKUP_HASH|${TOTALHASH}" >> ${BCKPDIR}/README.md
 
